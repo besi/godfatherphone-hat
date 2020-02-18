@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP 3006
+D Amplifier IC Development Tools I2S 3W Class D Amp Breakout MAX98357A
+K
+F https://cdn-learn.adafruit.com/downloads/pdf/adafruit-max98357-i2s-class-d-mono-amp.pdf
+$ENDCMP
+#
+#End Doc Library
