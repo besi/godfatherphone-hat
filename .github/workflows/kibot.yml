@@ -18,7 +18,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pcbdraw
         pip install svgpathtools
-        apt install kicad -y
+        sudo apt install kicad -y
     - name: Analysing the code with pylint
       run: |
         pcbdraw *.kicad_pcb output.png
