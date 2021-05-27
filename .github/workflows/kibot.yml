@@ -12,14 +12,16 @@ jobs:
     - name: Set up Python 3.8
       uses: actions/setup-python@v1
       with:
-        python-version: 3.8
+        python-version: 2.7
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pcbdraw
         pip install svgpathtools
         sudo apt install kicad -y
-    - name: Analysing the code with pylint
+    - name: Creating the diagram
       run: |
-        pcbdraw *.kicad_pcb output.png
+        pcbdraw *.kicad_pcb doc/board.png
+        git add doc/board.png
+        git commit -m "Added board.png"
         
