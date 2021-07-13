@@ -26,13 +26,14 @@ jobs:
 
     - name: Run ERC
       run: |
-        make -C . erc
+        pcbdraw *.kicad_pcb doc/board.png
+        ls doc/board.png
 
     - name: Retrieve results
       uses: actions/upload-artifact@v1
       with:
         name: ERC_Output
-        path: ./Fabrication
+        path: ./doc
 
   DRC:
     runs-on: ubuntu-latest
