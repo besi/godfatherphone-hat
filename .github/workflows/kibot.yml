@@ -1,27 +1,99 @@
-name: Run Kibot
+name: "KiCad CI/CD for Godfatherphone-hat"
 
-on: [push]
+on:
+  push:
+    paths:
+      - '*.sch'
+      - '*.kicad_pcb'
+      - '*.kibot.yaml'
+      - 'Makefile'
+      - '.github/workflows/kibot.yml'
+  pull_request:
+    paths:
+      - '*.sch'
+      - '*.kicad_pcb'
+      - '*.kibot.yaml'
+      - 'Makefile'
+      - '.github/workflows/kibot.yml'
 
 jobs:
-  build:
-
+  ERC:
     runs-on: ubuntu-latest
+    container: setsoft/kicad_auto:latest
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v1
+
+    - name: Run ERC
+      run: |
+        make -C . erc
+
+    - name: Retrieve results
+      uses: actions/upload-artifact@v1
       with:
-        python-version: 2.7
-    - name: Install dependencies
+        name: ERC_Output
+        path: ./Fabrication
+
+  DRC:
+    runs-on: ubuntu-latest
+    container: setsoft/kicad_auto:latest
+    needs: ERC
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run DRC
       run: |
-        python -m pip install --upgrade pip
-        pip install pcbdraw
-        pip install svgpathtools
-        sudo apt install kicad -y
-    - name: Creating the diagram
+        make -C . drc
+
+    - name: Retrieve results
+      uses: actions/upload-artifact@v1
+      with:
+        name: DRC_Output
+        path: ./Fabrication
+
+  FabSch:
+    name: Schematic fabrication files
+    runs-on: ubuntu-latest
+    container: setsoft/kicad_auto:latest
+    needs: ERC
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run schematic stuff
       run: |
-        pcbdraw *.kicad_pcb doc/board.png
-        git add doc/board.png
-        git commit -m "Added board.png"
-        
+        make -C . sch_fab
+
+    - name: Retrieve results
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: FabSch_Output
+        path: |
+          pcb_io/Fabrication/
+          pcb_io/kibot_error.log
+        if-no-files-found: warn
+
+  FabPCB:
+    name: PCB fabrication files
+    runs-on: ubuntu-latest
+    container: setsoft/kicad_auto:latest
+    needs: DRC
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run PCB stuff
+      run: |
+        make -C . pcb_fab
+
+    - name: Retrieve results
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: FabPCB_Output
+        path: |
+          ./Fabrication/
+          ./kibot_error.log
+        if-no-files-found: warn
